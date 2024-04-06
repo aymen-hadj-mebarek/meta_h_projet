@@ -1,6 +1,8 @@
-## Getting Started
+## HOW to use  : 
+you will find the main function in the App.java class, where you can just run it using IDE or command line to execute the JAVA GUI
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+- the function BFS, DFS, and A* are in thhe class "MainWindow.java" which is responsible for the calculation of the solution and the time of execution
+
 
 ## Folder Structure
 
@@ -13,6 +15,4 @@ Meanwhile, the compiled output files will be generated in the `bin` folder by de
 
 > If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
 
-## Dependency Management
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
