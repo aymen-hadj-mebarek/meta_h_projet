@@ -42,7 +42,7 @@ public class App {
         listObjects.add(new KpObject("Object5", 8, 4));
         listObjects.add(new KpObject("Object6", 3, 11));
         ArrayList<KnapSack> listSack = new ArrayList<KnapSack>(Arrays.asList(
-                new KnapSack( 1000),
+                new KnapSack( 500),
                 new KnapSack( 10)));
 
 

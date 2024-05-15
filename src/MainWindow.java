@@ -3,11 +3,13 @@ import javax.swing.*;
 import Classes.Node;
 import Classes.AStarNode;
 import Classes.KnapSack;
+import Classes.KnapSack2;
 import Classes.KpObject;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -212,6 +214,537 @@ public class MainWindow extends JFrame {
         System.out.print("\n");
     }
 
+    public static ArrayList<KpObject> initObjectList(int nbrObject, int minWeight, int maxWeight) {
+        ArrayList<KpObject> listObject = new ArrayList<>();
+    
+        for (int i = 0; i < nbrObject; i++)
+            listObject.add(new KpObject(i, (minWeight + rn.nextInt(maxWeight - minWeight)), 5 + rn.nextInt(15)));
+    
+        return listObject;
+    }
+
+    public static ArrayList<KnapSack2> initSackList(int nbrSack, int minCapacity, int maxCapacity) {
+    ArrayList<KnapSack2> listSack = new ArrayList<>();
+
+    for (int i = 0; i < nbrSack; i++) {
+        listSack.add(new KnapSack2(i, (maxCapacity - rn.nextInt(maxCapacity - minCapacity))));
+    }
+    return listSack;
+}
+    
+    public static Node generateSRef(ArrayList <KnapSack2> listSac, ArrayList <KpObject> listObject)
+    {
+        Node sref = new Node(initMatrix(listSac.size(), listObject.size()), 0, 0);
+        KnapSack2 s;
+        KpObject o;
+        while(sref._idO < listObject.size())
+        {
+            s = listSac.get(rn.nextInt(listSac.size()));
+            o = listObject.get(sref._idO);
+            if(o.getWeight() <= s._capacity)
+            {
+                sref._matrix[s.getId()][o.getId()] = 1;
+                sref._vTotal += o.getValue();
+                s._capacity -= o.getWeight();
+                s._listObjectOnSac.add(o);
+                s.printObjectOnSac();
+            }
+    
+            sref._idO++;
+        }
+
+        return sref;
+    }
+
+    public static ArrayList<int[]> searchArea(int[] srefRow,int index, int flip, ArrayList<KpObject> listObject, ArrayList<KnapSack> listSac) 
+    {
+        int h = 0;
+        int p;
+        int[] s;
+        KpObject o;
+        KnapSack sac;
+        ArrayList<int[]> searchArea = new ArrayList<>();
+
+        while (h < flip) { 
+            p = 0;
+            s = Arrays.copyOf(srefRow, srefRow.length); 
+            do{
+                if ((flip * p + h) < s.length) 
+                { 
+                    o = listObject.get(flip * p + h);
+                    sac = listSac.get(index);
+                    if (s[flip * p + h] == 0) 
+                    {
+                        if (o.getWeight() <= sac.getKnapSackCapacity()) 
+                        {
+                            s[flip * p + h] = 1;
+                            sac._capacity -= o.getWeight();
+
+                        }
+                    } 
+                    else 
+                    {
+                        s[flip * p + h] = 0;
+                        sac._capacity += o.getWeight();
+                    }
+                }
+                p++;
+            } while (flip * p + h < s.length);
+
+            searchArea.add(s);
+            h++;
+        }
+
+        return searchArea;
+    }
+
+    public static ArrayList<int[]> searchArea2(int[] srefRow,int index, int flip, ArrayList<KpObject> listObject, ArrayList<KnapSack2> listSac) 
+    {
+        int h = 0;
+        int p;
+        int[] s;
+        KpObject o;
+        KnapSack2 sac;
+        ArrayList<int[]> searchArea = new ArrayList<>();
+
+        while (h < flip) { 
+            p = 0;
+            s = Arrays.copyOf(srefRow, srefRow.length); 
+            do{
+                if ((flip * p + h) < s.length) 
+                { 
+                    o = listObject.get(flip * p + h);
+                    sac = listSac.get(index);
+                    if (s[flip * p + h] == 0) 
+                    {
+                        if (o.getWeight() <= sac.getKnapSackCapacity()) 
+                        {
+                            s[flip * p + h] = 1;
+                            sac._capacity -= o.getWeight();
+
+                        }
+                    } 
+                    else 
+                    {
+                        s[flip * p + h] = 0;
+                        sac._capacity += o.getWeight();
+                    }
+                }
+                p++;
+            } while (flip * p + h < s.length);
+
+            searchArea.add(s);
+            h++;
+        }
+
+        return searchArea;
+    }
+
+    public static ArrayList<Node> generateSolutions(Node sref, ArrayList<KpObject> listObject, ArrayList<KnapSack> listSac) {
+        ArrayList<Node> potentialSolutions = new ArrayList<>();
+        ArrayList<int[]> searchPoints;
+        int[][] sol;
+        for (int i = 0; i < sref._matrix.length; i++) 
+        {
+            searchPoints = searchArea(sref._matrix[i], i, 2, listObject, listSac); 
+            //Construction d'une solution
+            for (int[] point : searchPoints) {
+                sol = copyMatrix(sref._matrix);
+                sol[i] = point;
+                
+                Node solNode = new Node(sol, 0, calculateNodeValue(sol, listObject, listSac)); 
+                potentialSolutions.add(solNode);
+            }
+        }
+
+        // System.out.println("Abeilles generees");
+        // afficherMatricesCoteACote(potentialSolutions);
+        return potentialSolutions;
+    }
+
+    public static ArrayList<Node> generateSolutions2(Node sref, ArrayList<KpObject> listObject, ArrayList<KnapSack2> listSac) {
+        ArrayList<Node> potentialSolutions = new ArrayList<>();
+        ArrayList<int[]> searchPoints;
+        int[][] sol;
+        for (int i = 0; i < sref._matrix.length; i++) 
+        {
+            searchPoints = searchArea2(sref._matrix[i], i, 2, listObject, listSac); 
+            //Construction d'une solution
+            for (int[] point : searchPoints) {
+                sol = copyMatrix(sref._matrix);
+                sol[i] = point;
+                
+                Node solNode = new Node(sol, 0, calculateNodeValue2(sol, listObject, listSac)); 
+                potentialSolutions.add(solNode);
+            }
+        }
+
+        // System.out.println("Abeilles generees");
+        // afficherMatricesCoteACote(potentialSolutions);
+        return potentialSolutions;
+    }
+
+    public static int calculateNodeValue(int[][] sol, ArrayList<KpObject> listObject, ArrayList<KnapSack> listSac) {
+        int vTotal = 0;
+        for (int i = 0; i < sol.length; i++) 
+        {
+            for (int j = 0; j < sol[i].length; j++) 
+            {
+                if (sol[i][j] == 1) 
+                {
+                    KpObject object = listObject.get(j);
+                    KnapSack sack = listSac.get(i);
+                    vTotal += object.getValue();
+                }
+            }
+        }
+
+        return vTotal;
+    }
+    
+    public static int calculateNodeValue2(int[][] sol, ArrayList<KpObject> listObject, ArrayList<KnapSack2> listSac) {
+        int vTotal = 0;
+        for (int i = 0; i < sol.length; i++) 
+        {
+            for (int j = 0; j < sol[i].length; j++) 
+            {
+                if (sol[i][j] == 1) 
+                {
+                    KpObject object = listObject.get(j);
+                    KnapSack2 sack = listSac.get(i);
+                    vTotal += object.getValue();
+                }
+            }
+        }
+
+        return vTotal;
+    }
+    
+    public static boolean isObjectNotInOtherSacks(KpObject object, KnapSack2 currentSack, ArrayList<KnapSack2> allSacks) {
+        for (KnapSack2 sack : allSacks) {
+            if (sack != currentSack && sack._listObjectOnSac.contains(object)) {
+                return false; 
+            }
+        }
+        return true; 
+    }
+
+    public static ArrayList<Node> localSearch(Node sol, ArrayList<KnapSack2> listSac, ArrayList<KpObject> listObject)
+    {
+
+        ArrayList <Node> bees = new ArrayList<>();
+        Node newSol;
+        KpObject o;
+        KnapSack2 s;
+
+        for(int i = 0; i < sol._matrix.length; i++)
+        {
+            for(int j = 0; j < sol._matrix[0].length; j++)
+            {
+                o = listObject.get(j); 
+                s = listSac.get(i);
+                //Copy pour l'instant
+                newSol = new Node(copyMatrix(sol._matrix), j, sol._vTotal);
+                if(sol._matrix[i][j] == 1)
+                {
+                    newSol._matrix[i][j] = 0;
+                    newSol._vTotal -= o.getValue();
+                    bees.add(newSol);
+                    s._capacity += o.getWeight();
+                }
+                else 
+                {
+                    if(isObjectNotInOtherSacks(o, s, listSac))
+                    {
+                        if(o.getWeight() <= s._capacity)
+                        {
+                            newSol._matrix[i][j] = 1;
+                            newSol._vTotal += o.getValue();
+                            bees.add(newSol);
+                            s._capacity -= o.getWeight();
+                            
+                        }
+                    }
+                        
+                }
+               }
+            
+
+         }
+        //  afficherMatricesCoteACote(bees);
+
+         return bees;
+    }
+
+    public static Node getOptimalSolution(ArrayList<Node> bees)
+    {
+        Node optimalSol = bees.get(0);
+        for(int i = 1; i < bees.size(); i++)
+            if(bees.get(i)._vTotal > optimalSol._vTotal)
+                optimalSol = bees.get(i);
+
+
+        return optimalSol;
+    }
+    
+    public static Node getBestFromTableDance(ArrayList<Node> danceTable)
+    {
+        Node best = danceTable.get(0);
+        for(int i = 1; i < danceTable.size(); i++)
+            if(danceTable.get(i)._vTotal > best._vTotal)
+                best = danceTable.get(i);
+
+
+        return best;
+    }
+
+    public static Node getBestInDiversity(ArrayList<Node> danceTable, ArrayList<Node> tabooList) {
+        double minDifference = Double.MAX_VALUE;
+        Node bestDiverseSolution = null;
+        for (Node danceSolution : danceTable) {
+            for (Node tabooSolution : tabooList) {
+                double difference = Math.abs(danceSolution._vTotal - tabooSolution._vTotal);
+                if (difference < minDifference) {
+                    minDifference = difference;
+                    bestDiverseSolution = danceSolution;
+                }
+            }
+        }
+        return bestDiverseSolution;
+    }
+
+    public static int fitness(Node sol)
+    {
+        return sol._vTotal;
+    }
+
+    public static Node bso(int flip, int maxIteration, int maxChance, int nbChance,  ArrayList<KnapSack2> listSack, ArrayList<KpObject> listObject) {
+        Node sref = generateSRef(listSack, listObject);
+        ArrayList<Node> tabooList = new ArrayList<>();
+        ArrayList<Node> danceTable = new ArrayList<>();
+        Node bestSol;
+    
+        int i = 0; 
+    
+        while(i <= maxIteration) 
+        {
+            tabooList.add(sref);
+            ArrayList<Node> bees = generateSolutions2(sref, listObject, listSack);
+
+            for(int j = 0; j < bees.size(); j++) {
+                
+                bestSol = getOptimalSolution(localSearch(bees.get(j), listSack, listObject));
+                if(i == 0) {
+                    danceTable.add(bestSol);
+                } else {
+                    if(danceTable.get(j)._vTotal < bestSol._vTotal) {
+                        danceTable.set(j, bestSol);
+                    }
+                }
+            }
+    
+
+    
+            Node sBest = getBestFromTableDance(danceTable);
+    
+    
+            int delta = fitness(sBest) - fitness(tabooList.get(i));
+    
+            if(delta > 0) {
+                sref = sBest;
+                if(nbChance < maxChance) 
+                    nbChance = maxChance;
+                
+            } 
+            else 
+            {
+                nbChance--;
+                if(nbChance > 0) {
+                    sref = sBest;
+                } else {
+                    sref = getBestInDiversity(danceTable, tabooList);
+                    nbChance = maxChance;
+                }
+            }
+    
+            i++;
+        }
+    
+        return sref;
+    }
+    
+    public static int Space_left(Node node, ArrayList<KnapSack2> listSac, ArrayList<KpObject> listObject){
+        int S = 0;
+        for (int i = 0; i < node._matrix.length; i++) {
+            int total = listSac.get(i)._capacity;
+            for (int j = 0; j < node._matrix[i].length; j++) {
+                if(node._matrix[i][j] == 1){
+                    total -= listObject.get(j).getWeight();
+                }
+            }
+            S += total;
+        }
+        return S;
+    }
+
+    public static class NodeComparator implements Comparator<Node> {
+        private ArrayList<KnapSack2> listSac;
+        private ArrayList<KpObject> listObject;
+
+        public NodeComparator(ArrayList<KnapSack2> listSac, ArrayList<KpObject> listObject) {
+            this.listSac = listSac;
+            this.listObject = listObject;
+        }
+
+        @Override
+        public int compare(Node node1, Node node2) {
+            int totalValue1 = 4*node1._vTotal + Space_left(node1, listSac, listObject);
+            int totalValue2 = 4*node2._vTotal + Space_left(node2, listSac, listObject);
+            return Integer.compare(totalValue1, totalValue2);
+        }
+    }
+
+    public static int[][] generateMatrix(int nbrBackPack, int nbrObject) {
+        int[][] matrix = new int[nbrBackPack][nbrObject];
+
+        for (int i = 0; i < nbrBackPack; i++) {
+            for (int j = 0; j < nbrObject; j++)
+                if (!checkObjectAlreadyExists(matrix, j))
+                    matrix[i][j] = Math.round(rn.nextInt(2));
+        }
+
+        return matrix;
+    }
+    
+    public static boolean checkObjectAlreadyExists(int[][] m, int col) {
+        for (int i = 0; i < m.length; i++) {
+            if (m[i][col] == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static Node crossover(Node parent1, Node parent2, ArrayList<KnapSack2> listSac,
+            ArrayList<KpObject> listObject) {
+        // Check for compatibility: Ensure matrices have the same dimensions
+        if (parent1._matrix.length != parent2._matrix.length
+                || parent1._matrix[0].length != parent2._matrix[0].length) {
+            throw new IllegalArgumentException("Matrices have different dimensions and cannot be crossed over.");
+        }
+
+        // Choose a random crossover point
+        Random random = new Random();
+
+        Node offspring = new Node(initMatrix(parent1._matrix.length, parent2._matrix[0].length), 0, 0);
+        
+        do {
+            // System.out.println("Process of Crossover : ");
+            offspring = new Node(initMatrix(parent1._matrix.length, parent2._matrix[0].length), 0, 0);
+            int crossoverPoint = random.nextInt(parent1._matrix.length);
+
+            // Create a new Node to store the offspring
+
+            // Perform crossover
+            int[][] offspringMatrix = new int[parent1._matrix.length][parent1._matrix[0].length];
+            for (int i = 0; i < parent1._matrix.length; i++) {
+                if (i < crossoverPoint) {
+                    offspringMatrix[i] = parent1._matrix[i].clone(); // Copy row from parent 1
+                } else {
+                    offspringMatrix[i] = parent2._matrix[i].clone(); // Copy row from parent 2
+                }
+            }
+
+            offspring._matrix = offspringMatrix;
+            offspring._vTotal = offspring.calc_value2(listObject);
+            // Other attributes of offspring can be set here, like _idO and _vTotal if
+            // applicable
+        } while (!checkSolution(offspring, listSac, listObject));
+
+        return offspring;
+    }
+
+    public static void mutate(Node node, double mutationRate, ArrayList<KpObject> listObject) {
+        Random random = new Random();
+        
+        // Iterate through the matrix and mutate each element with a certain probability
+        for (int i = 0; i < node._matrix.length; i++) {
+            for (int j = 0; j < node._matrix[i].length; j++) {
+                if (random.nextDouble() < mutationRate) {
+                    // Flip the value (0 to 1 or 1 to 0)
+                    node._matrix[i][j] = (node._matrix[i][j] == 0) ? 1 : 0;
+                    node._vTotal = node.calc_value2(listObject);
+                }
+            }
+        }
+    }
+
+    public static boolean checkSolution(Node node, ArrayList<KnapSack2> listSac, ArrayList<KpObject> listObject) {
+        int S;
+        // verification du poids
+        for (int i = 0; i < node._matrix.length; i++) {
+            S = 0;
+            for (int j = 0; j < node._matrix[i].length; j++) {
+                if (node._matrix[i][j] == 1) {
+                    S += listObject.get(j).getWeight();
+                }
+            }
+            if (S > listSac.get(i)._capacity) {
+                return false;
+            }
+        }
+        // verification de repetition : 
+        boolean already_put = false;
+        for (int j = 0; j < node._matrix[0].length; j++) {
+            already_put = false;
+            for (int i = 0; i < node._matrix.length; i++) {
+                if(node._matrix[i][j] == 1){
+                    if(already_put == true){
+                        return false;
+                    }else{
+                        already_put = true;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public static Node GeneticAlgo(ArrayList<KnapSack2> listSac, ArrayList<KpObject> listObject,
+        ArrayList<Node> Solutions, int nbr_iterations, int value) {
+
+    double mutationRate = 0.5; // Adjust mutation rate as needed
+    int iteration;
+    for ( iteration = 0; iteration < nbr_iterations; iteration++) {
+        // Select parents for crossover (you can use different selection methods)
+        Node parent1 = Solutions.get(Solutions.size()-1);
+        Node parent2 = Solutions.get(Solutions.size()-2);
+
+        // Perform crossover
+        Node offspring = crossover(parent1, parent2, listSac, listObject);
+        
+        // Mutate offspring
+        mutate(offspring, mutationRate, listObject);
+        
+        offspring._vTotal = offspring.calc_value2(listObject);
+
+        // Evaluate offspring
+        if (checkSolution(offspring, listSac, listObject)) {
+            // Replace old solution with offspring
+            Solutions.remove(0); // Remove the worst solution
+            Solutions.add(offspring);
+        }
+
+        // Sort solutions based on the comparator
+        Collections.sort(Solutions, new NodeComparator(listSac, listObject));
+        if(Solutions.get(Solutions.size() - 1)._vTotal >= value){
+            break;
+        }
+
+    }
+    return Solutions.get(Solutions.size() - 1);
+}
+
     JLabel Titre;
     JButton MenuSacs;
     JButton MenuObjets;
@@ -219,13 +752,15 @@ public class MainWindow extends JFrame {
     JButton SolBFS;
     JButton SolDFS;
     JButton SolA;
+    JButton SolGA;
+    JButton SolBSO;
 
     MainWindow(ArrayList<KpObject> listObjects, ArrayList<KnapSack> listSacks) {
         Font Title_font = new Font("Cosmos", Font.BOLD, 40);
         Font Text_Font = new Font("Cosmos", Font.PLAIN, 20);
 
         this.setTitle("Probleme de Sac a Dos");
-        this.setSize(500, 800);
+        this.setSize(500, 900);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLayout(null);
@@ -361,6 +896,85 @@ public class MainWindow extends JFrame {
         });
         SolA.setFocusable(false);
 
+        SolGA = new JButton();
+        SolGA.setText("GA");
+        SolGA.setBounds(125, 725, 100, 100);
+        SolGA.setFont(Text_Font);
+        SolGA.setHorizontalAlignment(JLabel.CENTER);
+        SolGA.setVerticalAlignment(JLabel.CENTER);
+        SolGA.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                
+                ArrayList<Node> Solutions = new ArrayList<>();
+                int value = 2000;
+                int x = 0;
+                ArrayList <KnapSack2> listSac = new ArrayList<KnapSack2>();
+                
+                for (int i = 0; i < listSacks.size(); i++) {
+                    KnapSack2 new_sac = new KnapSack2(listSacks.get(i).getId(), listSacks.get(i).getKnapSackCapacity());
+                    listSac.add(new_sac);
+                }
+
+                while (x < 30) {
+                    Node sol = new Node(generateMatrix(listSac.size(), listObjects.size()), listObjects);
+                    if (checkSolution(sol, listSac, listObjects) && sol._vTotal > 0) {
+                        System.out.println(sol._vTotal);
+                        Solutions.add(sol);
+                        x++;
+                    }
+                }
+
+                int[][] matrix = initMatrix(listSacks.size(), listObjects.size());
+                Node initialState = new Node(matrix, 0, 0);
+                long startTime = System.currentTimeMillis();
+                
+                Node Best_Sol = GeneticAlgo(listSac, listObjects, Solutions, 350, value);
+                long endTime = System.currentTimeMillis();
+
+                double executionTimeSeconds = (endTime - startTime) / 1000.0;
+
+                new WindowResult(Best_Sol, listObjects, listSacks, executionTimeSeconds, "GA");   
+
+            }
+
+        });
+        SolGA.setFocusable(false);
+
+
+        SolBSO = new JButton();
+        SolBSO.setText("BSO");
+        SolBSO.setBounds(275, 725, 100, 100);
+        SolBSO.setFont(Text_Font);
+        SolBSO.setHorizontalAlignment(JLabel.CENTER);
+        SolBSO.setVerticalAlignment(JLabel.CENTER);
+        SolBSO.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[][] matrix = initMatrix(listSacks.size(), listObjects.size());
+                Node initialState = new Node(matrix, 0, 0);
+                long startTime = System.currentTimeMillis();
+
+                // ArrayList <KpObject> listObject = initObjectList(7, 20, 25);
+                ArrayList <KnapSack2> listSac = new ArrayList<KnapSack2>();
+                
+                for (int i = 0; i < listSacks.size(); i++) {
+                    KnapSack2 new_sac = new KnapSack2(listSacks.get(i).getId(), listSacks.get(i).getKnapSackCapacity());
+                    listSac.add(new_sac);
+                }
+
+                Node Solution = bso(6, 300, 50, 10, listSac, listObjects);
+                long endTime = System.currentTimeMillis();
+
+                double executionTimeSeconds = (endTime - startTime) / 1000.0;
+
+                new WindowResult(Solution, listObjects, listSacks, executionTimeSeconds, "BSO");
+            }
+
+        });
+        SolBSO.setFocusable(false);
+
         // ajout des elements :
         this.add(Titre);
         this.add(MenuSacs);
@@ -369,6 +983,8 @@ public class MainWindow extends JFrame {
         this.add(SolBFS);
         this.add(SolDFS);
         this.add(SolA);
+        this.add(SolGA);
+        this.add(SolBSO);
         this.setVisible(true);
     }
 

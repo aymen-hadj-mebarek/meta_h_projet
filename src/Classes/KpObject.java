@@ -15,6 +15,13 @@ public class KpObject {
         _value = value;
     }
 
+    public KpObject(int id, int weight, int value)
+    {
+        _id = id;
+        _weight = weight;
+        _value = value;
+    }
+    
     public String get_name() {
         return _name;
     }

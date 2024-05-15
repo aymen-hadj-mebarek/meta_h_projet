@@ -15,6 +15,13 @@ public class Node {
         _vTotal = vTotal;
     }
 
+    public Node(int [] [] matrix, ArrayList<KpObject> Object)
+        {
+            _matrix = matrix;
+            _idO = 0;
+            _vTotal = calc_value2(Object);
+        }
+
     public int calcValue(ArrayList<KnapSack> listSack, ArrayList<KpObject> listObject){
         int S = 0;
         for (int i = 0; i < _matrix.length; i++) {
@@ -66,5 +73,17 @@ public class Node {
 
         return b;
     
+    }
+
+    public int calc_value2( ArrayList<KpObject> Object){
+        int S = 0;
+        for (int i = 0; i < this._matrix.length; i++) {
+            for (int j = 0; j < this._matrix[i].length; j++) {
+                if(this._matrix[i][j] == 1){
+                    S += Object.get(j).getValue();
+                }
+            }
+        }
+        return S;
     }
 }
